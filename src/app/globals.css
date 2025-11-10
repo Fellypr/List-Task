@@ -118,3 +118,9 @@
     @apply bg-background text-foreground;
   }
 }
+
+@layer utilities {
+  .bg-\[url\(\/backGround\/geometric-shapes-background\/5390929\.jpg\)\] {
+    background-image: url(/backGround/geometric-shapes-background/5390929.jpg);
+  }
+}

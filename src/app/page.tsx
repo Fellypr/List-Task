@@ -3,7 +3,7 @@
 export default function Home() {
   return (
     <main>
-      <h1 className="">inicio</h1>
+      <h1 className="">inicsdddasdsadssdadadasdsdasio</h1>
     </main>
   );
 }
