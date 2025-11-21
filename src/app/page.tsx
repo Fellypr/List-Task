@@ -51,14 +51,14 @@ export default function Home() {
             />
             <div className="flex flex-col w-[100%] h-auto gap-3">
               <div className="flex justify-between items-center h-11 bg-white rounded-md shadow-[1px_1px_2px_0px_rgba(0,0,0,0.75)]" style={{backgroundColor: darkThema ? "#1b1b1bff" : "" , color: darkThema ? "#f0f0f0ff" : "" ,transition: "background-color 0.2s ease-in-out" ,borderColor: darkThema ? "#0019f8ff" : "" ,border: darkThema ? "1px solid #0019f8ff" : "" }}>
-                <div className="h-full bg-green-500 w-[12px] rounded-[3px]"></div>
+                <div className="h-full bg-green-500 w-[12px] rounded-[2px]"></div>
                 <h1 className="flex-1 pl-4">Tarefa</h1>
                 <div>
                   <ButtonTrash />
                 </div>
               </div>
-              <div className="flex justify-between items-center h-11 bg-white rounded-md shadow-[1px_1px_2px_0px_rgba(0,0,0,0.75)] pl-[2px]" style={{backgroundColor: darkThema ? "#1b1b1bff" : "" , color: darkThema ? "#f0f0f0ff" : "" ,transition: "background-color 0.2s ease-in-out",borderColor: darkThema ? "#0019f8ff" : "" ,border: darkThema ? "1px solid #0019f8ff" : ""}}>
-                <div className="h-full bg-red-500 w-[12px] rounded-[3px]"></div>
+              <div className="flex justify-between items-center h-11 bg-white rounded-md shadow-[1px_1px_2px_0px_rgba(0,0,0,0.75)] " style={{backgroundColor: darkThema ? "#1b1b1bff" : "" , color: darkThema ? "#f0f0f0ff" : "" ,transition: "background-color 0.2s ease-in-out",borderColor: darkThema ? "#0019f8ff" : "" ,border: darkThema ? "1px solid #0019f8ff" : ""}}>
+                <div className="h-full bg-red-500 w-[12px] rounded-[2px]"></div>
                 <h1 className="flex-1 pl-4">Tarefa1</h1>
                 <div>
                   <ButtonTrash />
