@@ -17,8 +17,19 @@ export default function Register() {
 
   const router = useRouter();
 
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const token = localStorage.getItem("token");
+      if (token) {
+        router.push("/");
+      }
+    }
+  },[]);
+
   const handleRegister = async (e) => {
     e.preventDefault();
+    setError("");
     try {
       setLoading(true);
       const response = await axios.post(
@@ -34,7 +45,13 @@ export default function Register() {
           },
         }
       );
-      setSuccess(response.data);
+      const token = response.data.token;
+
+      if (token){
+        localStorage.setItem("token", token);
+      }else{
+        console.log("No token received");
+      }
     } catch (error) {
       let message = "";
       if (error.response) {
@@ -56,7 +73,7 @@ export default function Register() {
         router.push("/");
       }, 4000);
     }
-  });
+  })
   useEffect(() => {
     if (error) {
       setTimeout(() => {

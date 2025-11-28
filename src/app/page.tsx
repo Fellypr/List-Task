@@ -2,6 +2,7 @@
 import { Calendar } from "@/components/ui/calendar";
 import * as React from "react";
 import { useState } from "react";
+import axios from "axios";
 
 import ButtonAdd from "@/components/ButtonAdd";
 import ButtonTrash from "../components/button-trash/ButtonTrash";
@@ -11,6 +12,36 @@ export default function Home() {
   const [darkThema, setDarkThema] = useState(false);
   const [handleStatus, setHandleStatus] = useState("Pendente");
 
+  const [nameTask, setNameTask] = useState("");
+  const [statusTask, setStatusTask] = useState("Pendente");
+  const [dateTask, setDateTask] = useState("");
+
+
+  const handleDateTask = {
+    NameTask: nameTask,
+    Status: statusTask,
+    DateTask: dateTask
+  }
+  const urlApi = "http://localhost:5185/api/TakeOnTheTask/registerTask";
+
+  const token =localStorage.getItem("token");
+
+  async function HandleAddTask(e) {
+    e.preventDefault();
+    try{
+      const response = await axios.post(urlApi, handleDateTask,{
+        headers: {
+          "Content-Type": "application/json",
+          Authorization:`Bearer ${token}`,
+        },
+      });
+      console.log(response.data);
+      alert("Tarefa adicionada com sucesso");
+    }catch(error){
+      alert("Erro ao adicionar tarefa");
+      console.log(error);
+    }
+  }
   function handleThema() {
     setDarkThema(!darkThema);
     console.log("darkThema", darkThema);
@@ -32,12 +63,14 @@ export default function Home() {
                 type="text"
                 placeholder="Adicione uma tarefa"
                 className="border border-1 border-gray-400 w-70 h-7 pl-2 rounded-sm outline-none focus:border-blue-600 placeholder: bg-white"
+                onChange={(e) => setNameTask(e.target.value)}
               />
               <ButtonAdd />
             </div>
             <input
               type="date"
               className="border border-1 border-gray-400 w-50 h-7 pl-2 rounded-sm outline-none focus:border-blue-600 placeholder: bg-white"
+              onChange={(e) => setDateTask(e.target.value)}
             />
           </div>
 
