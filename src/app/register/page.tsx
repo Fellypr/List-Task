@@ -17,7 +17,6 @@ export default function Register() {
 
   const router = useRouter();
 
-
   useEffect(() => {
     if (typeof window !== "undefined") {
       const token = localStorage.getItem("token");
@@ -25,7 +24,7 @@ export default function Register() {
         router.push("/");
       }
     }
-  },[]);
+  }, []);
 
   const handleRegister = async (e) => {
     e.preventDefault();
@@ -45,11 +44,17 @@ export default function Register() {
           },
         }
       );
-      const token = response.data.token;
 
-      if (token){
+      const {token , message} = response.data;
+      if (token) {
         localStorage.setItem("token", token);
-      }else{
+        setSuccess(message);
+        setTimeout(() => {
+          setSuccess(null);
+          setLoading(false);
+          router.push("/");
+        }, 4000);
+      } else {
         console.log("No token received");
       }
     } catch (error) {
@@ -66,21 +71,12 @@ export default function Register() {
     }
   };
   useEffect(() => {
-    if (success) {
-      setTimeout(() => {
-        setSuccess(null);
-        setLoading(false);
-        router.push("/");
-      }, 4000);
-    }
-  })
-  useEffect(() => {
     if (error) {
       setTimeout(() => {
         setError("");
       }, 4000);
     }
-  })
+  });
 
   return (
     <main className="flex flex-col items-center justify-center h-screen bg-[url(/backGround/geometric-shapes-background/5390929.jpg)] bg-cover">
