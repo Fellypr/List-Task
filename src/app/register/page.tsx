@@ -17,14 +17,6 @@ export default function Register() {
 
   const router = useRouter();
 
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const token = localStorage.getItem("token");
-      if (token) {
-        router.push("/");
-      }
-    }
-  }, []);
 
   const handleRegister = async (e) => {
     e.preventDefault();
