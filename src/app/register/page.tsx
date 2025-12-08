@@ -71,8 +71,8 @@ export default function Register() {
   });
 
   return (
-    <main className="flex flex-col items-center justify-center h-screen bg-[url(/backGround/geometric-shapes-background/5390929.jpg)] bg-cover">
-      <div className="flex flex-col items-center justify-center h-90 gap-10 w-90  shadow-[0px_0px_2px_4px_rgba(0,0,0,0.35)] rounded-sm bg-stone-100">
+    <main className="flex flex-col items-center justify-center h-screen bg-slate-400 bg-cover">
+      <div className="flex flex-col items-center justify-center h-90 gap-10 w-90  shadow-[0px_1px_2px_2px_rgba(0,0,0,0.35)] rounded-sm bg-stone-100">
         <h1 className="text-3xl font-medium">Register</h1>
         <form
           onSubmit={handleRegister}
@@ -107,7 +107,7 @@ export default function Register() {
         </form>
         <p>
           Already have an account?{" "}
-          <a href="/login" className="text-blue-600">
+          <a href="/" className="text-blue-600">
             Login
           </a>
         </p>

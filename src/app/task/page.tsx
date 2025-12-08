@@ -1,224 +1,306 @@
 "use client";
-import { Calendar } from "@/components/ui/calendar";
 import * as React from "react";
 import { useState, useEffect } from "react";
 import axios from "axios";
-import ButtonAdd from "@/components/ButtonAdd";
-import ButtonTrash from "../../components/button-trash/ButtonTrash";
-import DarkModeToggle from "../../components/check-box-tema-claro-escuro/DarkModeToggle";
-import MessageSuccess from "./MesageSuccess";
-import MessageError from "./MessageError";
-import LoadingDate from "@/components/loading/LoadingDate";
+import { Trash2, Plus, Sun, Moon } from "lucide-react";
+
+interface UserInfo {
+  Name: string;
+}
+
+interface Task {
+  IdTask: string | number;
+  NameTask: string;
+  Status: 'Pendente' | 'Concluido';
+  DateTask: string;
+  [key: string]: any; 
+}
+
+interface CalendarProps {
+  selected: Date;
+  onSelect: (date: Date | undefined) => void;
+  className: string;
+  style: React.CSSProperties;
+}
+
+interface DarkModeToggleProps {
+  handleThema: () => void;
+  darkThema: boolean;
+}
+
+
+const Calendar: React.FC<CalendarProps> = ({ selected, onSelect, className, style }) => (
+  <div className={`p-3 border rounded-md shadow-md ${className}`} style={style}>
+    <h3 className="text-center font-semibold mb-2" style={{ color: style.color }}>Selecione a Data</h3>
+    <input 
+      type="date" 
+      value={selected ? selected.toISOString().split('T')[0] : ''} 
+      onChange={(e) => {
+        const date = e.target.value ? new Date(e.target.value + "T12:00:00") : undefined;
+        onSelect(date);
+      }}
+      className="w-full p-2 border rounded-md text-center outline-none focus:ring-2 focus:ring-blue-600"
+      style={{ backgroundColor: style.backgroundColor, color: style.color, borderColor: style.borderColor || 'gray' }}
+    />
+  </div>
+);
+
+const ButtonAdd: React.FC = () => (
+  <button type="submit" className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-1.5 px-3 rounded-md transition duration-150 shadow-md flex items-center justify-center cursor-pointer">
+    <Plus className="w-5 h-5" />
+  </button>
+);
+
+const DarkModeToggle: React.FC<DarkModeToggleProps> = ({ handleThema, darkThema }) => (
+  <button onClick={handleThema} className="p-2 rounded-full text-white hover:bg-gray-700 transition duration-150 cursor-pointer">
+    {darkThema ? <Sun className="w-6 h-6 text-yellow-300" /> : <Moon className="w-6 h-6 text-gray-900" />}
+  </button>
+);
+
+
+const getProp = (obj: Task | UserInfo, key: string): any => 
+  obj[key] || 
+  obj[key.charAt(0).toLowerCase() + key.slice(1)] || 
+  obj[key.charAt(0).toUpperCase() + key.slice(1)];
+
+const convertToIsoDate = (dateString: string | undefined): string | null => {
+  if (!dateString) return null;
+  try {
+      const d = new Date(dateString);
+      return d.toISOString().split("T")[0];
+  } catch (e) {
+      return null;
+  }
+};
 
 export default function Home() {
-  const [date, setDate] = React.useState<Date | undefined>(new Date());
-  const [darkThema, setDarkThema] = useState(false);
-  const [success, setSuccess] = useState(false);
-  const [error, setError] = useState(null);
-  const [loading, setLoading] = useState(false);
+  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+  const [darkThema, setDarkThema] = useState<boolean>(false);
+  const [nameTask, setNameTask] = useState<string>("");
+  const [taskDateInput, setTaskDateInput] = useState<string>("");
+  const [inforUser, setInforUser] = useState<UserInfo | null>(null);
+  const [allUserTasks, setAllUserTasks] = useState<Task[]>([]);
+  const [filteredTasks, setFilteredTasks] = useState<Task[]>([]);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const [handleStatus, setHandleStatus] = useState("Pendente");
-  const [nameTask, setNameTask] = useState("");
-  const [dateTask, setDateTask] = useState("");
+  const token: string | null = typeof window !== 'undefined' ? localStorage.getItem("token") : null;
+  const apiBaseUrl: string = "http://localhost:5185/api";
 
-  const [inforUser, setInforUser] = useState(null);
-
-  const dataParaEnviar = date?.toISOString().split("T")[0];
-
-  const handleDateTask = {
+  const taskDataToSend = {
     NameTask: nameTask,
-    Status: handleStatus,
-    DateTask: dataParaEnviar,
+    Status: "Pendente",
+    DateTask: taskDateInput,
   };
-  
-  const urlApi = "http://localhost:5185/api/TakeOnTheTask/registerTask";
-
-  const token = localStorage.getItem("token");
 
   async function HandleUserInfo() {
+    if (!token) return;
     try {
-      const response = await axios.get(
-        "http://localhost:5185/api/AuthenticationUser/profile",
-        {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      const response = await axios.get<UserInfo>(`${apiBaseUrl}/AuthenticationUser/profile`, { 
+        headers: { Authorization: `Bearer ${token}` },
+      });
       setInforUser(response.data);
     } catch (error) {
-      console.log(error);
     }
   }
-  useEffect(() => {
-    HandleUserInfo();
-  }, []);
 
-  async function HandleAddTask(e) {
-    e.preventDefault();
-    setError(null);
+  async function HandleGetAllTasks() {
+    setLoading(true);
+    if (!token) {
+        setErrorMessage("Token não encontrado. Faça login.");
+        setLoading(false);
+        return;
+    }
+
     try {
-      setLoading(true);
-      const response = await axios.post(urlApi, handleDateTask, {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
+      const response = await axios.get<Task[]>(`${apiBaseUrl}/TakeOnTheTask/getAllTasks`, {
+        headers: { Authorization: `Bearer ${token}` },
       });
-      setNameTask("");
-      setDateTask("");
-      setSuccess(true);
-      setTimeout(() => {setSuccess(false)}, 4000);
-    } catch (error) {
-      let message = "";
-      if (error.response) {
-        message = error.response.data;
-      } else if (error.request) {
-        message = error.request;
+      
+      if (Array.isArray(response.data)) {
+          setAllUserTasks(response.data);
+          setErrorMessage(null);
       } else {
-        message = error.message;
+          setAllUserTasks([]);
       }
-      setError(message);
+
+    } catch (error) {
+      setAllUserTasks([]);
+      setErrorMessage("Erro ao conectar na API.");
     } finally {
       setLoading(false);
     }
   }
-  function handleThema() {
-    setDarkThema(!darkThema);
-    console.log("darkThema", darkThema);
+
+  async function HandleAddTask(e: React.FormEvent) {
+    e.preventDefault();
+    if (!nameTask || !taskDateInput) {
+        setErrorMessage("Preencha nome e data.");
+        return;
+    }
+
+    try {
+      await axios.post(`${apiBaseUrl}/TakeOnTheTask/registerTask`, taskDataToSend, {
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+      });
+      setNameTask("");
+      setTaskDateInput("");
+      setErrorMessage("Tarefa adicionada!");
+      HandleGetAllTasks(); 
+    } catch (error) {
+      setErrorMessage("Erro ao adicionar.");
+    }
   }
 
+  async function HandleUpdateStatus(taskId: string | number, newStatus: string) {
+    const updatedTasks = allUserTasks.map(t => {
+        const tId = getProp(t, 'IdTask');
+        return tId === taskId ? { ...t, Status: newStatus, status: newStatus } : t
+    });
+    setAllUserTasks(updatedTasks);
+
+    try {
+      await axios.put(`${apiBaseUrl}/TakeOnTheTask/updateTask/${taskId}`, { Status: newStatus }, {
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+      });
+    } catch (error) {
+      HandleGetAllTasks();
+    }
+  }
+
+  async function HandleDeleteTask(taskId: string | number) {
+    const filtered = allUserTasks.filter(t => getProp(t, 'IdTask') !== taskId);
+    setAllUserTasks(filtered);
+
+    try {
+      await axios.delete(`${apiBaseUrl}/TakeOnTheTask/deleteTask/${taskId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+    } catch (error) {
+      HandleGetAllTasks();
+    }
+  }
+
+  useEffect(() => {
+    HandleUserInfo();
+    HandleGetAllTasks();
+  }, []);
+
+  useEffect(() => {
+    if (!selectedDate) {
+        setFilteredTasks([]);
+        return;
+    }
+
+    const selectedDateString = convertToIsoDate(selectedDate.toISOString());
+
+    const filtered = allUserTasks.filter(tarefa => {
+      const rawDate: string = getProp(tarefa, 'DateTask');
+      const taskDate = convertToIsoDate(rawDate);
+      
+      const match = taskDate === selectedDateString;
+      
+      return match;
+    });
+
+    setFilteredTasks(filtered);
+  }, [selectedDate, allUserTasks]);
+
+  function handleThema() {
+    setDarkThema(!darkThema);
+  }
+
+  const getStatusColor = (status: string): string => status === "Concluido" ? "#00ff55ff" : "#ffaf01ff";
+
   return (
-    <main
-      className="h-screen flex flex-col bg-gray-100"
-      style={{
-        backgroundColor: darkThema ? "#1B1C1D" : "",
-        transition: "background-color 0.2s ease-in-out",
-      }}
-    >
-      <nav
-        className="flex items-center justify-around w-full h-17 bg-gray-600 text-white font-bold"
-        style={{ backgroundColor: darkThema ? "#242424ff" : "" }}
-      >
-        <h1 className="text-3xl flex-1 flex items-center justify-center pl-20">
-          Bem vindo a Sua Lista de Tarefas {inforUser?.name}
+    <main className={`h-screen flex flex-col ${darkThema ? "dark" : ""}`} style={{ backgroundColor: darkThema ? "#1B1C1D" : "#f3f4f6", transition: "background-color 0.2s" }}>
+      <nav className="flex items-center justify-around w-full h-17 text-white font-bold shadow-md" style={{ backgroundColor: darkThema ? "#242424ff" : "#4b5563" }}>
+        <h1 className="text-3xl flex-1 flex items-center justify-center pl-20 py-4">
+          Lista de Tarefas de {inforUser ? getProp(inforUser, 'Name') : "..."}
         </h1>
-        <div className="flex items-center justify-center relative right-20">
-          <DarkModeToggle handleThema={handleThema} />
+        <div className="flex flex-col items-center justify-center relative right-20">
+          <DarkModeToggle handleThema={handleThema} darkThema={darkThema}  />
         </div>
       </nav>
-      <section className="flex flex-col h-screen items-center justify-center overflow-y-hidden">
-        <div className="flex items-start justify-around w-full h-full pt-15">
-          <form
-            className="flex flex-col justify-center items-center bg-white shadow-[0px_1px_2px_0px_rgba(0,0,0,0.75)] rounded-md w-[400px] h-[100px] gap-2"
-            style={{
-              backgroundColor: darkThema ? "#242424ff" : "",
-              transition: "background-color 0.2s ease-in-out",
-              borderColor: darkThema ? "#0019f8ff" : "",
-              border: darkThema ? "1px solid #d3d3d3ff" : "",
-            }}
-            onSubmit={HandleAddTask}
-          >
-            <div
-              className="flex justify-center items-center gap-2"
-            >
-              <input
-                type="text"
-                placeholder="Adicione uma tarefa"
-                className="border border-1 border-gray-400 w-70 h-7 pl-2 rounded-sm outline-none focus:border-blue-600 placeholder: bg-white"
-                onChange={(e) => setNameTask(e.target.value)}
-                value={nameTask}
-                required
-              />
+
+      {errorMessage && (
+        <div className="w-full text-center p-2 bg-red-100 text-red-800 border-b border-red-200">
+          {errorMessage}
+        </div>
+      )}
+
+      <section className="flex flex-col h-full items-center pt-8 overflow-y-auto">
+        <div className="flex flex-wrap justify-center gap-10 w-full max-w-6xl">
+          <form className="flex flex-col justify-center items-center bg-white shadow-xl rounded-lg w-[400px] h-[150px] gap-4 p-4"
+            style={{ backgroundColor: darkThema ? "#242424ff" : "white", borderColor: darkThema ? "#0019f8ff" : "", border: darkThema ? "1px solid" : "" }}
+            onSubmit={HandleAddTask}>
+            <h2 className="text-xl font-semibold" style={{ color: darkThema ? "#f0f0f0ff" : "#1f2937" }}>Adicionar Nova Tarefa</h2>
+            <div className="flex justify-center items-center gap-2">
+              <input type="text" placeholder="Nome da Tarefa" className="border border-gray-400 w-60 h-8 pl-2 rounded-md outline-none"
+                onChange={(e) => setNameTask(e.target.value)} value={nameTask} required 
+                style={{ color: darkThema ? "#f0f0f0ff" : "black", backgroundColor: darkThema ? "#1b1b1bff" : "white" }}/>
               <ButtonAdd />
             </div>
-            <input
-              type="date"
-              className="border border-1 border-gray-400 w-50 h-7 pl-2 rounded-sm outline-none focus:border-blue-600 placeholder: bg-white"
-              onChange={(e) => setDateTask(e.target.value)}
-              value={dateTask}
-              required
-            />
+            <input type="date" className="border border-gray-400 w-60 h-8 pl-2 rounded-md outline-none"
+              onChange={(e) => setTaskDateInput(e.target.value)} value={taskDateInput} required 
+              style={{ color: darkThema ? "#f0f0f0ff" : "black", backgroundColor: darkThema ? "#1b1b1bff" : "white" }}/>
           </form>
 
-          <div
-            className="flex flex-col justify-center items-center bg-white  rounded-md w-[400px] h-auto gap-5 p-3 shadow-[0px_1px_2px_0px_rgba(0,0,0,0.75)]"
-            style={{
-              backgroundColor: darkThema ? "#242424ff" : "",
-              transition: "background-color 0.2s ease-in-out",
-              borderColor: darkThema ? "#0019f8ff" : "",
-              border: darkThema ? "1px solid #d3d3d3ff" : "",
-            }}
-          >
-            <Calendar
-              mode="single"
-              selected={date}
-              onSelect={setDate}
-              className="rounded-md border shadow-sm"
-              captionLayout="dropdown"
-              style={{
-                backgroundColor: darkThema ? "#1b1b1bff" : "",
-                color: darkThema ? "#f0f0f0ff" : "",
-                transition: "background-color 0.2s ease-in-out",
-              }}
-            />
-            <div className="flex flex-col w-[100%] h-auto gap-3">
-              <div
-                className="flex justify-between items-center h-11 bg-white rounded-md shadow-[1px_1px_2px_0px_rgba(0,0,0,0.75)] "
-                style={{
-                  backgroundColor: darkThema ? "#1b1b1bff" : "",
-                  color: darkThema ? "#f0f0f0ff" : "",
-                  transition: "background-color 0.2s ease-in-out",
-                  borderColor: darkThema ? "#0019f8ff" : "",
-                  border: darkThema ? "1px solid #0019f8ff" : "",
-                }}
-              >
-                <div
-                  className="h-full bg-red-500 w-[12px] rounded-[3px] relative right-[1px] "
-                  style={{
-                    backgroundColor:
-                      handleStatus === "Pendente" ? "#3a3a3aff" : "#00ff55ff",
-                    transition: "background-color 0.2s ease-in-out",
-                  }}
-                ></div>
-                <h1 className="flex-1 pl-4">Tarefa1</h1>
-                <div className="flex items-center gap-1">
-                  <select
-                    className="h-6 rounded-sm outline-none border-black border bg-white"
-                    style={{
-                      backgroundColor: darkThema ? "#3a3a3aff" : "",
-                      color: darkThema ? "#f0f0f0ff" : "",
-                      transition: "background-color 0.2s ease-in-out",
-                      borderColor: darkThema ? "#0019f8ff" : "",
-                      border: darkThema ? "1px solid #0019f8ff" : "",
-                    }}
-                    onChange={(e) => setHandleStatus(e.target.value)}
-                  >
-                    <option value="Pendente">Pendente</option>
-                    <option value="Concluido">Concluido</option>
-                  </select>
-                  <ButtonTrash />
-                </div>
-              </div>
-            </div>
+          <div className="flex flex-col items-center bg-white rounded-lg w-[400px] p-4 shadow-xl"
+            style={{ backgroundColor: darkThema ? "#242424ff" : "white", borderColor: darkThema ? "#0019f8ff" : "", border: darkThema ? "1px solid" : "" }}>
+            <h2 className="text-xl font-semibold mb-4" style={{ color: darkThema ? "#f0f0f0ff" : "#1f2937" }}>Data do Filtro</h2>
+            <Calendar selected={selectedDate} onSelect={setSelectedDate} className="rounded-md border shadow-sm"
+              style={{ backgroundColor: darkThema ? "#1b1b1bff" : "white", color: darkThema ? "#f0f0f0ff" : "black" }} />
           </div>
         </div>
-        {success && (
-          <div className="absolute top-20 right-10">
-            <MessageSuccess success={success} />
-          </div>
-        )}  
-        {error && (
-          <div className="absolute top-20 right-10">
-            <MessageError error={error} />
-          </div>
-        )}
-        {loading && (
-          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-            <LoadingDate />
-          </div>
-        )}
+
+        <div className="flex flex-col w-full max-w-3xl h-auto gap-3 p-6 mt-8 mb-10 bg-white rounded-xl shadow-2xl"
+          style={{ backgroundColor: darkThema ? "#242424ff" : "white", borderColor: darkThema ? "#0019f8ff" : "", border: darkThema ? "1px solid" : "" }}>
+          <h2 className="text-2xl font-bold mb-3" style={{ color: darkThema ? "#f0f0f0ff" : "#1f2937" }}>
+              Tarefas do dia {selectedDate ? selectedDate.toLocaleDateString('pt-BR') : ''}
+          </h2>
+          
+          <div className="flex flex-col w-[100%] h-auto gap-3 max-h-80 overflow-y-auto">
+            {loading ? (
+                <h1 className="text-center" style={{ color: darkThema ? "#f0f0f0ff" : "#1f2937" }}>Carregando...</h1>
+            ) : filteredTasks.length === 0 ? (
+                <div className="text-center py-4">
+                    <h1 style={{ color: darkThema ? "#f0f0f0ff" : "#1f2937" }}>Nenhuma tarefa encontrada.</h1>
+                    <p className="text-xs text-gray-400 mt-1">Verifique se você selecionou a data correta no calendário.</p>
+                </div>
+            ) : (
+                filteredTasks.map((tarefa, index) => {
+                  const tId = getProp(tarefa, 'IdTask') as string | number;
+                  const tName = getProp(tarefa, 'NameTask') as string;
+                  const tStatus = getProp(tarefa, 'Status') as string;
+                  
+                  const statusColor = getStatusColor(tStatus);
+                  const isConcluido = tStatus === "Concluido";
+
+                  return (
+                    <div key={tId || index} className="flex justify-between items-center h-12 bg-white rounded-md shadow-sm border border-gray-200"
+                      style={{ backgroundColor: darkThema ? "#1b1b1bff" : "white", color: darkThema ? "#f0f0f0ff" : "black", borderColor: darkThema ? "#0019f8ff" : "" }}>
+                      <div className="h-full w-[8px] rounded-l-md transition duration-300" style={{ backgroundColor: statusColor }}></div>
+                      <h1 className="flex-1 pl-4 text-base font-medium truncate" style={{ textDecoration: isConcluido ? 'line-through' : 'none' }}>
+                        {tName}
+                      </h1>
+                      <div className="flex items-center gap-2 pr-2">
+                        <select className="h-7 rounded-md outline-none border bg-white px-1 text-sm cursor-pointer"
+                          value={tStatus} onChange={(e) => HandleUpdateStatus(tId, e.target.value)}
+                          style={{ color: darkThema ? "#ffffffff" : "black", borderColor: darkThema ? "#0019f8ff" : "" , backgroundColor: darkThema ? "#1b1b1bff" : "white" }}>
+                          <option value="Pendente">Pendente</option>
+                          <option value="Concluido">Concluído</option>
+                        </select>
+                        <button onClick={() => HandleDeleteTask(tId)} className="p-1.5 rounded-full hover:bg-red-100 text-red-500 cursor-pointer">
+                            <Trash2 className="w-5 h-5" />
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })
+              )}
+            </div>
+        </div>
       </section>
     </main>
   );

@@ -55,16 +55,15 @@ export default function Login() {
     } catch (error) {
       let message = "Erro ao fazer login. Por favor, tente novamente.";
       if(error.response){
-        message = error.response.data;
+        message = error.response.data.message || `Erro: ${error.response.status}: ${error.response.statusText}`;
       }
       else if(error.request){
-        message = error.request;
+        message = "Erro com a requisição. Por favor, verifique sua conexão.";
       }else{
         message = error.message
       }
       setError(message);
       setLoading(false);
-      console.log(error);
     }
   }
   // if(typeof window !== "undefined" && !success && localStorage.getItem("token")){
@@ -72,8 +71,8 @@ export default function Login() {
   // }
 
   return (
-    <main className="flex flex-col items-center justify-center h-screen bg-[url(/backGround/geometric-shapes-background/5390929.jpg)] bg-cover">
-      <div className="flex flex-col items-center justify-center h-90 gap-15 w-90  shadow-[0px_0px_2px_4px_rgba(0,0,0,0.35)] rounded-sm bg-stone-100 ">
+    <main className="flex flex-col items-center justify-center h-screen bg-slate-400">
+      <div className="flex flex-col items-center justify-center h-90 gap-15 w-90  shadow-[0px_1px_2px_1px_rgba(0,0,0,0.35)] rounded-sm bg-stone-100 ">
         <h1 className="text-3xl font-medium">Login</h1>
         <form
           onSubmit={handleLogin}
