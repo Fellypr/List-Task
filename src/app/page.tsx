@@ -1,32 +1,27 @@
 "use client";
+
 import { useState, useEffect } from "react";
 import axios from "axios";
 import { useRouter } from "next/navigation";
-import MessageSuccessLogin from "./MessageSuccessLogin";
-import MessageError from "./MessageError";
-import LoadingDate from "../components/loading/LoadingDate";
+import { Mail, Lock } from "lucide-react";
 
+import MessageSuccess from "../components/message/MessageSuccess";
+import MessageError from "../components/message/MessageError";
+import LoadingDate from "../components/loading/LoadingDate";
 
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [success, setSuccess] = useState(null);
+  const [success, setSuccess] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<string | null>(null);
+
   const router = useRouter();
 
-  // useEffect(() => {
-  //   if (typeof window !== "undefined") {
-  //     const token = localStorage.getItem("token");
-  //     if (token) {
-  //       router.push("/task");
-  //     }
-  //   }
-  // }, []);
-
-  async function handleLogin(e) {
+  async function handleLogin(e: React.FormEvent) {
     e.preventDefault();
     if (loading) return;
+
     try {
       setLoading(true);
       const response = await axios.post(
@@ -35,85 +30,91 @@ export default function Login() {
           Email: email,
           Password: password,
         },
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
+        { headers: { "Content-Type": "application/json" } }
       );
-      const {token , message} = response.data;
+
+      const { token, message } = response.data;
+
       if (token) {
         localStorage.setItem("token", token);
         setSuccess(message);
-
         setTimeout(() => {
-          setSuccess(null);
           setLoading(false);
           router.push("/task");
-        }, 4000);
+        }, 3000);
       }
-    } catch (error) {
-      let message = "Erro ao fazer login. Por favor, tente novamente.";
-      if(error.response){
-        message = error.response.data.message || `Erro: ${error.response.status}: ${error.response.statusText}`;
-      }
-      else if(error.request){
-        message = "Erro com a requisição. Por favor, verifique sua conexão.";
-      }else{
-        message = error.message
-      }
-      setError(message);
-      setLoading(false);
+    } catch {
+      setError("Email ou senha incorretos");
+      setTimeout(() => {
+        setError(null);
+        setLoading(false);
+      }, 3000);
     }
   }
-  // if(typeof window !== "undefined" && !success && localStorage.getItem("token")){
-  //   return <div className="flex flex-col items-center justify-center h-screen">Redirecionando para sua Conta... </div>
-  // }
 
   return (
-    <main className="flex flex-col items-center justify-center h-screen bg-slate-400">
-      <div className="flex flex-col items-center justify-center h-90 gap-15 w-90  shadow-[0px_1px_2px_1px_rgba(0,0,0,0.35)] rounded-sm bg-stone-100 ">
-        <h1 className="text-3xl font-medium">Login</h1>
-        <form
-          onSubmit={handleLogin}
-          className="flex flex-col gap-4 items-center justify-center"
-        >
-          <input
-            type="email"
-            placeholder="Email"
-            className="border-1 border-gray-400 w-70 h-7 pl-2 rounded-sm outline-none focus:border-blue-600 placeholder: bg-white"
-            onChange={(e) => setEmail(e.target.value)}
-          />
-          <input
-            type="password"
-            placeholder="Password"
-            className="border-1 border-gray-400 w-70 h-7 pl-2 rounded-sm outline-none focus:border-blue-600 placeholder: bg-white"
-            onChange={(e) => setPassword(e.target.value)}
-          />
-          <button className="w-50 bg-blue-600 text-white p-2 rounded-sm relative top-5 hover:bg-blue-700 hover:cursor-pointer flex items-center justify-center">
-            {loading && (
-              <div className="flex items-center justify-start relative right-10 ">
-                <LoadingDate />
-              </div>
-            )}
-            Login
+    <main className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-100 to-slate-300">
+      <div className="w-full max-w-md bg-white rounded-2xl shadow-xl p-10">
+        
+        <div className="flex justify-center mb-6">
+          <div className="w-14 h-14 rounded-full bg-gradient-to-r from-blue-500 to-cyan-400 flex items-center justify-center">
+            <div className="w-5 h-5 bg-white rounded-full" />
+          </div>
+        </div>
+
+        <h1 className="text-3xl font-semibold text-center text-gray-800">
+          Welcome Back
+        </h1>
+        <p className="text-center text-gray-500 mt-1 mb-8">
+          Please sign in to your account
+        </p>
+
+        <form onSubmit={handleLogin} className="space-y-5">
+
+          <div className="relative">
+            <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+            <input
+              type="email"
+              placeholder="Email"
+              className="w-full h-12 pl-11 pr-4 rounded-xl border border-gray-300 focus:outline-none focus:border-blue-500"
+              onChange={(e) => setEmail(e.target.value)}
+            />
+          </div>
+
+          <div className="relative">
+            <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+            <input
+              type="password"
+              placeholder="Password"
+              className="w-full h-12 pl-11 pr-4 rounded-xl border border-gray-300 focus:outline-none focus:border-blue-500"
+              onChange={(e) => setPassword(e.target.value)}
+            />
+          </div>
+
+          <button
+            type="submit"
+            className="w-full h-12 rounded-xl bg-gradient-to-r from-blue-500 to-blue-600 text-white font-medium hover:opacity-90 transition flex items-center justify-center cursor-pointer"
+          >
+            {loading ? <LoadingDate /> : "Sign In"}
           </button>
         </form>
-        <p>
+
+        <p className="text-center text-sm text-gray-500 mt-6">
           Don&apos;t have an account?{" "}
-          <a href="/register" className="text-blue-600">
-            Register
+          <a href="/register" className="text-blue-500 font-medium hover:underline">
+            Sign Up
           </a>
         </p>
       </div>
+
       {success && (
-        <div className="absolute top-20 right-10">
-          <MessageSuccessLogin success={success} />
+        <div className="absolute top-6 right-6">
+          <MessageSuccess success={success} />
         </div>
       )}
       {error && (
-        <div className="absolute top-20 right-10 bg-red-500 text-white p-4 rounded-md shadow-md">
-          <MessageError error={error}/>
+        <div className="absolute top-6 right-6">
+          <MessageError error={error} />
         </div>
       )}
     </main>

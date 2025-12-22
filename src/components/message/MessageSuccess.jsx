@@ -14,7 +14,7 @@ const MessageSuccess = ({success}) => {
           </svg>
         </div>
         <div className="message-text-container">
-          <p className="message-text">Cadastro Realizado Com Sucesso</p>
+          {/* <p className="message-text">Cadastro Realizado Com Sucesso</p> */}
           <p className="sub-text">{success}</p>
         </div>
       </div>

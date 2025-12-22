@@ -13,10 +13,10 @@ const MessageError = ({ error }) => {
               </svg>
             </div>
             <div className="error-prompt-container">
-              <p className="error-prompt-heading">Erro ao cadastrar usuário
+              <p className="error-prompt-heading">
               </p><div className="error-prompt-wrap">
                 <ul className="error-prompt-list" role="list">
-                  <li>{error}</li>
+                  <li className="whitespace-pre-line">{error}</li>
                 </ul>
               </div>
             </div>
