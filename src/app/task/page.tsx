@@ -502,7 +502,7 @@ export default function Home() {
                         className="h-7 rounded-md outline-none border bg-white px-1 text-sm cursor-pointer"
                         value={tStatus}
                         onChange={(e) =>
-                          HandleUpdateStatus(tId, e.target.value)
+                          HandleUpdateStatus(tId, e.target.value as "Pendente" | "Concluido")
                         }
                         style={{
                           color: darkThema ? "#ffffffff" : "black",
