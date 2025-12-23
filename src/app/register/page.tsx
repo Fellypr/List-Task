@@ -26,6 +26,8 @@ export default function Register() {
 
   const router = useRouter();
 
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+
   const formtValidationErrors = (errorData: ValidationErros): string => {
     const allMessages: string[] = [];
     for (const name in errorData.errors) {
@@ -43,7 +45,7 @@ export default function Register() {
     try {
       setLoading(true);
       const response = await axios.post(
-        "http://localhost:5185/api/AuthenticationUser/register",
+        `${apiUrl}/api/AuthenticationUser/register`,
         {
           Name: username,
           Email: email,

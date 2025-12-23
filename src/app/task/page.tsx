@@ -125,7 +125,7 @@ export default function Home() {
 
   const token: string | null =
     typeof window !== "undefined" ? localStorage.getItem("token") : null;
-  const apiBaseUrl: string = "http://localhost:5185/api";
+  const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL;
 
   const taskDataToSend = {
     NameTask: nameTask,
@@ -148,7 +148,7 @@ export default function Home() {
     if (!token) return;
     try {
       const response = await axios.get<UserInfo>(
-        `${apiBaseUrl}/AuthenticationUser/profile`,
+        `${apiBaseUrl}/api/AuthenticationUser/profile`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
@@ -167,7 +167,7 @@ export default function Home() {
 
     try {
       const response = await axios.get<Task[]>(
-        `${apiBaseUrl}/TakeOnTheTask/getAllTasks`,
+        `${apiBaseUrl}/api/TakeOnTheTask/getAllTasks`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
@@ -196,7 +196,7 @@ export default function Home() {
 
     try {
       await axios.post(
-        `${apiBaseUrl}/TakeOnTheTask/registerTask`,
+        `${apiBaseUrl}/api/TakeOnTheTask/registerTask`,
         taskDataToSend,
         {
           headers: {
@@ -255,7 +255,7 @@ export default function Home() {
 
     try {
       await axios.put(
-        `${apiBaseUrl}/TakeOnTheTask/updateTask/${taskId}`,
+        `${apiBaseUrl}/api/TakeOnTheTask/updateTask/${taskId}`,
         { Status: newStatus },
         {
           headers: {
@@ -276,7 +276,7 @@ export default function Home() {
     setAllUserTasks(filtered);
 
     try {
-      await axios.delete(`${apiBaseUrl}/TakeOnTheTask/deleteTask/${taskId}`, {
+      await axios.delete(`${apiBaseUrl}/api/TakeOnTheTask/deleteTask/${taskId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
     } catch (error) {
