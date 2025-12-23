@@ -247,7 +247,7 @@ export default function Home() {
 
   async function HandleUpdateStatus(
     taskId: string | number,
-    newStatus: string
+    newStatus: "Pendente" | "Concluido"
   ) {
     const updatedTasks = allUserTasks.map((t) => {
       const tId = getProp(t, "IdTask");
@@ -255,7 +255,7 @@ export default function Home() {
         ? { ...t, Status: newStatus, status: newStatus }
         : t;
     });
-    setAllUserTasks(updatedTasks);
+    setAllUserTasks(updatedTasks as Task[]);
 
     try {
       await axios.put(
