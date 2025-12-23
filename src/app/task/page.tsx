@@ -88,10 +88,14 @@ const DarkModeToggle: React.FC<DarkModeToggleProps> = ({
   </button>
 );
 
-const getProp = (obj: Task | UserInfo, key: string): any =>
-  obj[key] ||
-  obj[key.charAt(0).toLowerCase() + key.slice(1)] ||
-  obj[key.charAt(0).toUpperCase() + key.slice(1)];
+const getProp = (obj: Task | UserInfo, key: string): any => {
+  const objectAsAny = obj as any;
+  return (
+    objectAsAny[key] ||
+    objectAsAny[key.charAt(0).toLowerCase() + key.slice(1)] ||
+    objectAsAny[key.charAt(0).toUpperCase() + key.slice(1)]
+  );
+};
 
 const convertToIsoDate = (dateString: string | undefined): string | null => {
   if (!dateString) return null;
