@@ -116,7 +116,7 @@ const ButtonAdd: React.FC = () => (
 );
 
 export default function Home() {
-  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
   const [darkThema, setDarkThema] = useState<boolean>(false);
   const [nameTask, setNameTask] = useState<string>("");
   const [taskDateInput, setTaskDateInput] = useState<string>("");
@@ -412,7 +412,7 @@ export default function Home() {
             </h2>
             <Calendar
               selected={selectedDate}
-              onSelect={setSelectedDate}
+              onSelect={(date) => setSelectedDate(date)}
               className="rounded-md border shadow-sm"
               style={{
                 backgroundColor: darkThema ? "#1b1b1bff" : "white",
