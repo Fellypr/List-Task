@@ -411,7 +411,7 @@ export default function Home() {
               Data do Filtro
             </h2>
             <Calendar
-              selected={selectedDate}
+              selected={selectedDate || new Date()}
               onSelect={(date) => setSelectedDate(date)}
               className="rounded-md border shadow-sm"
               style={{
