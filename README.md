@@ -1,36 +1,60 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 📋 Task Manager Frontend
 
-## Getting Started
+Aplicação **frontend** de gerenciamento de tarefas, desenvolvida com **Next.js**, que permite **autenticação de usuários**, **criação**, **listagem**, **filtragem por data**, **atualização de status** e **remoção de tarefas**, com suporte a **Dark Mode**.
 
-First, run the development server:
+Este projeto consome uma **API REST** para autenticação e gerenciamento das tarefas.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+---
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 🚀 Funcionalidades
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### 🔐 Autenticação
+- Login de usuário
+- Registro de novos usuários
+- Armazenamento de token JWT no `localStorage`
+- Proteção de rotas baseada em autenticação
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### 📝 Gerenciamento de Tarefas
+- Criar novas tarefas
+- Definir data da tarefa
+- Listar todas as tarefas do usuário
+- Filtrar tarefas por data (calendário)
+- Atualizar status da tarefa:
+  - `Pendente`
+  - `Concluído`
+- Excluir tarefas
 
-## Learn More
+### 🎨 Interface
+- Modo Claro / Escuro (Dark Mode)
+- Feedback visual de sucesso e erro
+- Loading states durante requisições
+- Interface responsiva e moderna
 
-To learn more about Next.js, take a look at the following resources:
+---
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 🛠️ Tecnologias Utilizadas
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- **Next.js (App Router)**
+- **React**
+- **TypeScript**
+- **Axios**
+- **Tailwind CSS**
+- **Lucide Icons**
+- **React Icons**
 
-## Deploy on Vercel
+---
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## 📁 Estrutura de Páginas
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- `/` → Login  
+- `/register` → Cadastro de usuário  
+- `/task` → Página principal de tarefas (dashboard)
+
+---
+
+## 🔗 Integração com API
+
+O projeto consome uma API externa configurada via variável de ambiente:
+
+```env
+NEXT_PUBLIC_API_URL=http://localhost:5000
