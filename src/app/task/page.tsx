@@ -1,12 +1,12 @@
 "use client";
 import * as React from "react";
-import Link from 'next/link';
+import Link from "next/link";
 import { useState, useEffect } from "react";
 import axios, { AxiosError } from "axios";
 import { Trash2, Plus, Sun, Moon, LinkIcon } from "lucide-react";
+import LoadingDate from "@/components/loading/LoadingDate";
 import { RiUser6Line } from "react-icons/ri";
 import MessageSuccess from "@/components/message/MessageSuccess";
-import { da } from "date-fns/locale";
 
 interface UserInfo {
   Name: string;
@@ -70,8 +70,6 @@ const Calendar: React.FC<CalendarProps> = ({
   </div>
 );
 
-
-
 const DarkModeToggle: React.FC<DarkModeToggleProps> = ({
   handleThema,
   darkThema,
@@ -106,17 +104,11 @@ const convertToIsoDate = (dateString: string | undefined): string | null => {
     return null;
   }
 };
-const ButtonAdd: React.FC = () => (
-  <button
-    type="submit"
-    className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-1.5 px-3 rounded-md transition duration-150 shadow-md flex items-center justify-center cursor-pointer"
-  >
-    <Plus className="w-5 h-5" />
-  </button>
-);
 
 export default function Home() {
-  const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(
+    new Date()
+  );
   const [darkThema, setDarkThema] = useState<boolean>(false);
   const [nameTask, setNameTask] = useState<string>("");
   const [taskDateInput, setTaskDateInput] = useState<string>("");
@@ -126,6 +118,7 @@ export default function Home() {
   const [loading, setLoading] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [loadingAddTask, setLoadingAddTask] = useState<boolean>(false);
 
   const token: string | null =
     typeof window !== "undefined" ? localStorage.getItem("token") : null;
@@ -137,16 +130,16 @@ export default function Home() {
     DateTask: taskDateInput,
   };
 
-  const formtValidationErrors = (errorData :ValidationErros) : string => {
-    const allMessages : string[] = [];
-    for(const NameErros in errorData.errors){
-      if(Object.prototype.hasOwnProperty.call(errorData.errors,NameErros)){
+  const formtValidationErrors = (errorData: ValidationErros): string => {
+    const allMessages: string[] = [];
+    for (const NameErros in errorData.errors) {
+      if (Object.prototype.hasOwnProperty.call(errorData.errors, NameErros)) {
         const messages = errorData.errors[NameErros];
-        messages.forEach(msg => allMessages.push(`- ${msg}`));
+        messages.forEach((msg) => allMessages.push(`- ${msg}`));
       }
     }
     return allMessages.join("\n");
-  }
+  };
 
   async function HandleUserInfo() {
     if (!token) return;
@@ -185,7 +178,9 @@ export default function Home() {
       }
     } catch (error) {
       setAllUserTasks([]);
-      setErrorMessage("Error de carregamento de tarefas. Tente novamente Mais Tarde.");
+      setErrorMessage(
+        "Error de carregamento de tarefas. Tente novamente Mais Tarde."
+      );
     } finally {
       setLoading(false);
     }
@@ -197,7 +192,7 @@ export default function Home() {
       setErrorMessage("Preencha nome e data.");
       return;
     }
-
+    setLoadingAddTask(true);
     try {
       await axios.post(
         `${apiBaseUrl}/api/TakeOnTheTask/registerTask`,
@@ -209,7 +204,6 @@ export default function Home() {
           },
         }
       );
-
       setNameTask("");
       setTaskDateInput("");
       setSuccessMessage("Tarefa adicionada com sucesso!");
@@ -242,6 +236,8 @@ export default function Home() {
         message = axiosError.message;
       }
       setErrorMessage(message);
+    }finally {
+      setLoadingAddTask(false);
     }
   }
 
@@ -280,9 +276,12 @@ export default function Home() {
     setAllUserTasks(filtered);
 
     try {
-      await axios.delete(`${apiBaseUrl}/api/TakeOnTheTask/deleteTask/${taskId}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      await axios.delete(
+        `${apiBaseUrl}/api/TakeOnTheTask/deleteTask/${taskId}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
     } catch (error) {
       HandleGetAllTasks();
     }
@@ -332,8 +331,11 @@ export default function Home() {
         className="flex items-center justify-around w-full h-17 text-white font-bold shadow-md"
         style={{ backgroundColor: darkThema ? "#242424ff" : "#2166c7ff" }}
       >
-        <Link href="/" className="flex flex-col items-center justify-center relative left-20 text-red-500 hover:text-red-600 transition duration-150">
-          <RiUser6Line size={20}/>
+        <Link
+          href="/"
+          className="flex flex-col items-center justify-center relative left-20 text-red-500 hover:text-red-600 transition duration-150"
+        >
+          <RiUser6Line size={20} />
           <p>Logout</p>
         </Link>
         <h1 className="text-3xl flex-1 flex items-center justify-center  py-4">
@@ -380,7 +382,12 @@ export default function Home() {
                   backgroundColor: darkThema ? "#1b1b1bff" : "white",
                 }}
               />
-              <ButtonAdd  />
+              <button
+                type="submit"
+                className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-1.5 px-3 rounded-md transition duration-150 shadow-md flex items-center justify-center cursor-pointer text-[12px]"
+              >
+                {loading ? <LoadingDate  /> : <Plus />}
+              </button>
             </div>
             <input
               type="date"
@@ -502,7 +509,10 @@ export default function Home() {
                         className="h-7 rounded-md outline-none border bg-white px-1 text-sm cursor-pointer"
                         value={tStatus}
                         onChange={(e) =>
-                          HandleUpdateStatus(tId, e.target.value as "Pendente" | "Concluido")
+                          HandleUpdateStatus(
+                            tId,
+                            e.target.value as "Pendente" | "Concluido"
+                          )
                         }
                         style={{
                           color: darkThema ? "#ffffffff" : "black",
